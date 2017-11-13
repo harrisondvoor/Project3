@@ -57,7 +57,8 @@ try:
 except:
     CACHE_DICTION = {}
 
-
+conn = sqlite3.connect("206_APIsAndDBs.sqlite")
+cur = conn.cursor()
 
 # Define your function get_user_tweets here:
 def get_user_tweets(user_name):
@@ -74,7 +75,7 @@ def get_user_tweets(user_name):
 	for tweet in CACHE_DICTION:
 		cur.execute('SELECT * from Users WHERE user_id=?', (str(CACHE_DICTION[tweet][0]),))
 		if not cur.fetchone():
-			cur.execute('INSERT INTO Users(user_id, screen_name, num_favs, description) VALUES (?,?,?,?,?)', (CACHE_DICTION[tweet][0], CACHE_DICTION[tweet][1], CACHE_DICTION[tweet][6], CACHE_DICTION[tweet][7]))
+			cur.execute('INSERT INTO Users(user_id, screen_name, num_favs, description) VALUES (?,?,?,?)', (CACHE_DICTION[tweet][0], CACHE_DICTION[tweet][1], CACHE_DICTION[tweet][6], CACHE_DICTION[tweet][7]))
 			user_contents = CACHE_DICTION[tweet][5]
 			for r in range(len(user_contents)):
 				cur.execute('SELECT * from Users WHERE user_id=?', (str(user_contents[r]['id']),))
@@ -100,7 +101,7 @@ def get_user_tweets(user_name):
 
 # Write an invocation to the function for the "umich" user timeline and 
 # save the result in a variable called umich_tweets:
-umich_tweets = get_user_tweets('umich')
+
 
 
 
@@ -115,22 +116,12 @@ umich_tweets = get_user_tweets('umich')
 conn = sqlite3.connect("206_APIsAndDBs.sqlite")
 cur = conn.cursor()
 
-cur.execute('DROP TABLE IF EXISTS Tweets')
+cur.execute('DROP TABLE IF EXISTS Users')
 cur.execute('CREATE TABLE Users (user_id INTEGER, screen_name VARCHAR(128), num_favs INTEGER, description VARCHAR(128), PRIMARY KEY(user_id), FOREIGN KEY(user_id) REFERENCES Tweets(user_posted))')
 cur.execute('DROP TABLE IF EXISTS Tweets')
 cur.execute('CREATE TABLE Tweets(tweet_id VARCHAR(128), tweet_text VARCHAR(128), user_posted INTEGER, time_posted TIMESTAMP, retweets INTEGER, PRIMARY KEY(tweet_id), FOREIGN KEY(user_posted) REFERENCES Users(user_id))')
 conn.commit()
-
-
-
-
-
-
-
-for x in umich_tweets:
-	my_tup = x['id_str'], x['text'], x['user']['id_str'], x['created_at'], x['retweet_count']
-	cur.execute('INSERT INTO Tweets (tweet_id, text_, user_posted, time_posted, retweets) VALUES (?,?,?,?,?)', my_tup)
-
+umich_tweets = get_user_tweets('umich')
 
 ## You should load into the Tweets table: 
 # Info about all the tweets (at least 20) that you gather from the 
@@ -156,8 +147,10 @@ for x in umich_tweets:
 
 # Make a query to select all of the records in the Users database. 
 # Save the list of tuples in a variable called users_info.
-
-users_info = True
+users_info = []
+cur.execute("SELECT * from Users")
+for element in cur:
+	users_info.append(element)
 
 # Make a query to select all of the user screen names from the database. 
 # Save a resulting list of strings (NOT tuples, the strings inside them!) 
