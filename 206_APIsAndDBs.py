@@ -138,7 +138,7 @@ for element in lst_of_users:
 
 for element in lst_of_tweets:
 	cur.execute('INSERT INTO Tweets VALUES (?,?,?,?,?)', element) #inserting the values from the tuples into the Tweets table in the database
-conn.commit() #committing again
+conn.commit() #committing once again
 
 
 
